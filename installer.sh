@@ -14,6 +14,27 @@
 
 ### VARIABLES ###
 
+dist="$(. /etc/os-release && echo "$ID")"
+CONTINUE_ANYWAY=""
+FQDN=""
+
+### OUTPUTS ###
+
+output(){
+    echo -e '\e[36m'"$1"'\e[0m';
+}
+
+function trap_ctrlc ()
+{
+    output "Bye!"
+    exit 2
+}
+trap "trap_ctrlc" 2
+
+warning(){
+    echo -e '\e[31m'"$1"'\e[0m';
+}
+
 ### OS Check ###
 
 oscheck(){
@@ -36,54 +57,57 @@ oscheck(){
     fi
 }
 
+## Install Nextloud ##
+
+install-begin(){
+    output ""
+    output "Enter the address you want to access Nextcloud with. This could be an FQDN or an IP address."
+    output "For security, we recommend that you use an FQDN with a security certificate that this script can create after this point."
+    output "Make sure that your FQDN is pointed to your IP with an A record. If not the script will not be able to provide the webpage."
+    read -r FQDN
+    [ -z "$FQDN" ] && output "FQDN can't be empty."
+    IP=$(dig +short myip.opendns.com @resolver2.opendns.com -4)
+    DOMAIN=$(dig +short ${FQDNPHPMYADMIN})
+    if [ "${IP}" != "${DOMAIN}" ]; then
+        output ""
+        output "Your FQDN does not resolve to the IP of current server."
+        output "Please point your servers IP to your FQDN."
+        install-begin-fqdnnotpointed
+    else
+        output "Your FQDN is pointed correctly. Continuing."
+        phpmyadmininstall
+    fi
+}
+
+install-begin-fqdnnotpointed(){
+    output ""
+    output "This error can sometimes be false positive."
+    output "Do you want to continue anyway?"
+    output "(Y/N):"
+    read -r CONTINUE_ANYWAY
+
+    if [[ "$CONTINUE_ANYWAY" =~ [Yy] ]]; then
+        required
+    fi
+    if [[ "$CONTINUE_ANYWAY" =~ [Nn] ]]; then
+        exit 1
+    fi
+}
+
+
 ### Options ###
 
 options(){
     output "Please select your installation option:"
-    warning "[1] Install Panel. | Installs latest version of Pterodactyl Panel"
-    warning "[2] Install Wings. | Installs latest version of Pterodactyl Wings."
-    warning "[3] Install PHPMyAdmin. | Installs PHPMyAdmin. (Installs using NGINX)"
-    warning ""
-    warning "[4] Update Panel. | Updates your Panel to the latest version. May remove addons and themes."
-    warning "[5] Update Wings. | Updates your Wings to the latest version."
-    warning ""
-    warning "[6] Uninstall Wings. | Uninstalls your Wings. This will also remove all of your game servers."
-    warning "[7] Uninstall Panel. | Uninstalls your Panel. You will only be left with your database and web server."
-    warning ""
-    warning "[8] Renew Certificates | Renews all Lets Encrypt certificates on this machine."
-    warning "[9] Configure Firewall | Configure UFW to your liking."
-    warning "[10] Switch Pterodactyl Domain | Changes your Pterodactyl Domain."
+    warning "[1] Install Nextcloud. | Install the latest version of Nextcloud."
+    warning "[2] Uninstall Nextcloud. | Uninstalls Nextcloud. This includes your personal files on it too."
     read -r option
     case $option in
         1 ) option=1
-            start
+            install-begin
             ;;
         2 ) option=2
-            startwings
-            ;;
-        3 ) option=3
-            startphpmyadmin
-            ;;
-        4 ) option=4
-            updatepanel
-            ;;
-        5 ) option=5
-            updatewings
-            ;;
-        6 ) option=6
-            uninstallwings
-            ;;
-        7 ) option=7
-            uninstallpanel
-            ;;
-        8 ) option=8
-            renewcertificates
-            ;;
-        9 ) option=9
-            configureufw
-            ;;
-        10 ) option=10
-            switchdomains
+            uninstall-begin
             ;;
         * ) output ""
             output "Please enter a valid option from 1-10"
