@@ -19,6 +19,8 @@ CONTINUE_ANYWAY=""
 FQDN=""
 SSL_CONFIRM=""
 EMAIl=""
+DBPASSWORD=""
+
 
 ### OUTPUTS ###
 
@@ -116,7 +118,7 @@ required-ssl(){
         apt install nginx certbot unzip mariadb-server -y
         cd /var/www/ || exit || output "An error occurred. Could not enter the directory." || exit
         wget https://download.nextcloud.com/server/releases/latest.zip
-        sudo unzip latest.zip -d /var/www/nextcloud
+        sudo unzip latest.zip -d /var/www/
         sudo chown www-data:www-data /var/www/nextcloud -R
         DBPASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
         mysql -u root -e "CREATE USER 'nextcloud'@'127.0.0.1' IDENTIFIED BY '$DBPASSWORD';" && mysql -u root -e "CREATE DATABASE nextcloud;" && mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'nextcloud'@'127.0.0.1' WITH GRANT OPTION;"
@@ -140,7 +142,7 @@ required(){
         apt install nginx unzip mariadb-server -y
         cd /var/www/ || exit || output "An error occurred. Could not enter the directory." || exit
         wget https://download.nextcloud.com/server/releases/latest.zip
-        sudo unzip latest.zip -d /var/www/nextcloud
+        sudo unzip latest.zip -d /var/www/
         sudo chown www-data:www-data /var/www/nextcloud -R
         DBPASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
         mysql -u root -e "CREATE USER 'nextcloud'@'127.0.0.1' IDENTIFIED BY '$DBPASSWORD';" && mysql -u root -e "CREATE DATABASE nextcloud;" && mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'nextcloud'@'127.0.0.1' WITH GRANT OPTION;"
@@ -163,7 +165,7 @@ install-begin-fqdnnotpointed(){
     read -r CONTINUE_ANYWAY
 
     if [[ "$CONTINUE_ANYWAY" =~ [Yy] ]]; then
-        required
+        ssl
     fi
     if [[ "$CONTINUE_ANYWAY" =~ [Nn] ]]; then
         exit 1
