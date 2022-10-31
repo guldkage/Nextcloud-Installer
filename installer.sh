@@ -121,6 +121,7 @@ required-ssl(){
         DBPASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
         mysql -u root -e "CREATE USER 'nextcloud'@'127.0.0.1' IDENTIFIED BY '$DBPASSWORD';" && mysql -u root -e "CREATE DATABASE nextcloud;" && mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'nextcloud'@'127.0.0.1' WITH GRANT OPTION;"
 
+        rm /etc/nginx/sites-enabled/default
         curl -o /etc/nginx/sites-enabled/nextcloud.conf https://raw.githubusercontent.com/guldkage/Nextcloud-Installer/main/nextcloud-ssl.conf
         sed -i -e "s@<domain>@${FQDN}@g" /etc/nginx/sites-enabled/nextcloud.conf
         systemctl stop nginx && certbot certonly --standalone -d $FQDN --staple-ocsp --no-eff-email -m $EMAIL --agree-tos && systemctl start nginx
@@ -144,7 +145,9 @@ required(){
         DBPASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
         mysql -u root -e "CREATE USER 'nextcloud'@'127.0.0.1' IDENTIFIED BY '$DBPASSWORD';" && mysql -u root -e "CREATE DATABASE nextcloud;" && mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'nextcloud'@'127.0.0.1' WITH GRANT OPTION;"
 
+        rm /etc/nginx/sites-enabled/default
         curl -o /etc/nginx/sites-enabled/nextcloud.conf https://raw.githubusercontent.com/guldkage/Nextcloud-Installer/main/nextcloud.conf
+        sed -i -e "s@<domain>@${FQDN}@g" /etc/nginx/sites-enabled/nextcloud.conf
         systemctl restart nginx
 
     elif  [ "$dist" =  "fedora" ] ||  [ "$dist" =  "centos" ] || [ "$dist" =  "rhel" ] || [ "$dist" =  "rocky" ] || [ "$dist" = "almalinux" ]; then
