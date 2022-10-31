@@ -113,9 +113,9 @@ required(){
     output "Starting the installation of Nextcloud"
     sleep 1s
     if  [ "$dist" =  "ubuntu" ] || [ "$dist" =  "debian" ]; then
-        cd /var/www/ || exit || output "An error occurred. Could not enter the directory." || exit
         apt update
         apt install nginx certbot unzip mariadb-server -y
+        cd /var/www/ || exit || output "An error occurred. Could not enter the directory." || exit
         wget https://download.nextcloud.com/server/releases/latest.zip
         sudo unzip latest.zip -d /var/www/nextcloud
         sudo chown www-data:www-data /var/www/nextcloud -R
