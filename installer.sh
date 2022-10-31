@@ -103,7 +103,7 @@ install-begin(){
         install-begin-fqdnnotpointed
     else
         output "Your FQDN is pointed correctly. Continuing."
-        required
+        ssl
     fi
 }
 
