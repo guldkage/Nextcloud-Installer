@@ -81,10 +81,10 @@ ssl(){
     output "(Y/N):"
     read -r SSL_CONFIRM
 
-    if [[ "$SSL_CONFIRM_PHPMYADMIN" =~ [Yy] ]]; then
+    if [[ "$SSL_CONFIRM" =~ [Yy] ]]; then
         email-ssl
         fi
-    if [[ "$SSL_CONFIRM_PHPMYADMIN" =~ [Nn] ]]; then
+    if [[ "$SSL_CONFIRM" =~ [Nn] ]]; then
         required
         fi
 }
