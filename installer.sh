@@ -5,7 +5,7 @@
 #                                                                      #
 #            Nextcloud Installer                                       #
 #            Copyright 2022, Malthe K, <me@malthe.cc>                  #
-# https://github.com/guldkage/Nextcloud-Installer/blob/main/LICENSE    #
+#  https://github.com/guldkage/Nextcloud-Installer/blob/main/LICENSE   #
 #                                                                      #
 #  This script is not associated with Nextcloud GmbH                   #
 #  You may not remove this line                                        #
@@ -17,6 +17,8 @@
 dist="$(. /etc/os-release && echo "$ID")"
 CONTINUE_ANYWAY=""
 FQDN=""
+SSL_CONFIRM=""
+EMAIl=""
 
 ### OUTPUTS ###
 
@@ -59,7 +61,34 @@ oscheck(){
 
 ## Install Nextloud ##
 
+email-ssl(){
+    output ""
+    output "Because you chose to protect your Nextcloud instance with SSL, your email address must be used to create an SSL certificate."
+    output "Your email will be forwarded to Let's Encrypt. If you do not agree, stop the script."
+    output ""
+    output "Please enter your email"
+    read -r EMAIL
+    required-ssl
+}
+
+ssl(){
+    output ""
+    output "Do you want to use SSL for Nextcloud? This requires a domain."
+    output "Use of SSL is always recommended as the connection is not encrypted without SSL."
+    output "Your personal files will therefore be safest with an SSL connection."
+    output "(Y/N):"
+    read -r SSL_CONFIRM
+
+    if [[ "$SSL_CONFIRM_PHPMYADMIN" =~ [Yy] ]]; then
+        email-ssl
+        fi
+    if [[ "$SSL_CONFIRM_PHPMYADMIN" =~ [Nn] ]]; then
+        required
+        fi
+}
+
 install-begin(){
+    apt install dig
     output ""
     output "Enter the address you want to access Nextcloud with. This could be an FQDN or an IP address."
     output "For security, we recommend that you use an FQDN with a security certificate that this script can create after this point."
@@ -75,7 +104,29 @@ install-begin(){
         install-begin-fqdnnotpointed
     else
         output "Your FQDN is pointed correctly. Continuing."
-        phpmyadmininstall
+        required
+    fi
+}
+
+required(){
+    output ""
+    output "Starting the installation of Nextcloud"
+    sleep 1s
+    if  [ "$dist" =  "ubuntu" ] || [ "$dist" =  "debian" ]; then
+        cd /var/www/ || exit || output "An error occurred. Could not enter the directory." || exit
+        apt update
+        apt install nginx certbot unzip mariadb-server -y
+        wget https://download.nextcloud.com/server/releases/latest.zip
+        sudo unzip latest.zip -d /var/www/nextcloud
+        sudo chown www-data:www-data /var/www/nextcloud -R
+        DBPASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
+        mysql -u root -e "CREATE USER 'nextcloud'@'127.0.0.1' IDENTIFIED BY '$DBPASSWORD';" && mysql -u root -e "CREATE DATABASE nextcloud;" && mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'nextcloud'@'127.0.0.1' WITH GRANT OPTION;"
+
+        curl -o /etc/nginx/sites-enabled/nextcloud.conf https://raw.githubusercontent.com/guldkage/Nextcloud-Installer/main/nextcloud.conf
+        systemctl restart nginx
+
+    elif  [ "$dist" =  "fedora" ] ||  [ "$dist" =  "centos" ] || [ "$dist" =  "rhel" ] || [ "$dist" =  "rocky" ] || [ "$dist" = "almalinux" ]; then
+        test....
     fi
 }
 
@@ -99,8 +150,8 @@ install-begin-fqdnnotpointed(){
 
 options(){
     output "Please select your installation option:"
-    warning "[1] Install Nextcloud. | Install the latest version of Nextcloud."
-    warning "[2] Uninstall Nextcloud. | Uninstalls Nextcloud. This includes your personal files on it too."
+    output "[1] Install Nextcloud. | Install the latest version of Nextcloud."
+    output "[2] Uninstall Nextcloud. | Uninstalls Nextcloud. This includes your personal files on it too."
     read -r option
     case $option in
         1 ) option=1
