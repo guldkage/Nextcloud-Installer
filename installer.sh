@@ -88,7 +88,6 @@ ssl(){
 }
 
 install-begin(){
-    apt install dig
     output ""
     output "Enter the address you want to access Nextcloud with. This could be an FQDN or an IP address."
     output "For security, we recommend that you use an FQDN with a security certificate that this script can create after this point."
@@ -108,13 +107,36 @@ install-begin(){
     fi
 }
 
-required(){
+required-ssl(){
     output ""
     output "Starting the installation of Nextcloud"
     sleep 1s
     if  [ "$dist" =  "ubuntu" ] || [ "$dist" =  "debian" ]; then
         apt update
         apt install nginx certbot unzip mariadb-server -y
+        cd /var/www/ || exit || output "An error occurred. Could not enter the directory." || exit
+        wget https://download.nextcloud.com/server/releases/latest.zip
+        sudo unzip latest.zip -d /var/www/nextcloud
+        sudo chown www-data:www-data /var/www/nextcloud -R
+        DBPASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
+        mysql -u root -e "CREATE USER 'nextcloud'@'127.0.0.1' IDENTIFIED BY '$DBPASSWORD';" && mysql -u root -e "CREATE DATABASE nextcloud;" && mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'nextcloud'@'127.0.0.1' WITH GRANT OPTION;"
+
+        curl -o /etc/nginx/sites-enabled/nextcloud.conf https://raw.githubusercontent.com/guldkage/Nextcloud-Installer/main/nextcloud.conf
+        sed -i -e "s@<domain>@${FQDN}@g" /etc/nginx/sites-enabled/nextcloud.conf
+        systemctl stop nginx && certbot certonly --standalone -d $FQDN --staple-ocsp --no-eff-email -m $EMAIL --agree-tos && systemctl start nginx
+
+    elif  [ "$dist" =  "fedora" ] ||  [ "$dist" =  "centos" ] || [ "$dist" =  "rhel" ] || [ "$dist" =  "rocky" ] || [ "$dist" = "almalinux" ]; then
+        test....
+    fi
+}
+
+required(){
+    output ""
+    output "Starting the installation of Nextcloud"
+    sleep 1s
+    if  [ "$dist" =  "ubuntu" ] || [ "$dist" =  "debian" ]; then
+        apt update
+        apt install nginx unzip mariadb-server -y
         cd /var/www/ || exit || output "An error occurred. Could not enter the directory." || exit
         wget https://download.nextcloud.com/server/releases/latest.zip
         sudo unzip latest.zip -d /var/www/nextcloud
