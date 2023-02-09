@@ -12,12 +12,22 @@ If you find any errors, things you would like changed or queries for things in t
 - Install Nextcloud
 - Uninstall Nextcloud
 
-## Supported webservers & OS
+## Supported OS & Webserver
 Supported operating systems.
 
-- Debian based systems (Disclaimer: Please use Ubuntu system if possible. Debian may have issues with APT repositories.)
-- (You can may use the script with other systems, it is only half supported right now.)
-- Nginx webserver, please bear with me that Apache is not supported. A decision made by me.
+| Operating System | Version               | Supported                          |
+| ---------------- | ----------------------| ---------------------------------- |
+| Ubuntu           | from 18.04 to 22.04   | :white_check_mark:                 |
+| Debian           | from 10 to 11         | :white_check_mark:                 |
+| CentOS           | no supported versions | :x:                                |
+| Rocky Linux      | no supported versions | :x:                                |
+
+| Webserver        | Supported           |
+| ---------------- | --------------------| 
+| NGINX            | :white_check_mark:  |
+| Apache           | :x:                 |
+| LiteSpeed        | :x:                 |
+| Caddy            | :x:                 |
 
 ## Copyright
 You have no right to say that you created this script. You may create a fork for this Nextcloud-Installer, but this github must always be linked to.
@@ -29,4 +39,13 @@ The script has been tested many times without any bug fixes, however they can st
 If you find errors, feel free to open an "Issue" on GitHub.
 
 # Run the script
-The script is not done.
+Debian based systems only.
+```bash
+bash <(curl -s https://raw.githubusercontent.com/guldkage/Nextcloud-Installer/main/installer.sh)
+```
+
+### Raspbian
+Only for raspbian users. They might need a extra < in the beginning.
+```bash
+bash < <(curl -s https://raw.githubusercontent.com/guldkage/Nextcloud-Installer/main/installer.sh)
+```
