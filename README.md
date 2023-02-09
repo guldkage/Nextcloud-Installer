@@ -30,8 +30,7 @@ Supported operating systems.
 | Caddy            | :x:                 |
 
 ## Copyright
-You have no right to say that you created this script. You may create a fork for this Nextcloud-Installer, but this github must always be linked to.
-Also, do not remove my copyright at the top of the Nextcloud-Installer script.
+You have no right to say that you created this script. You may create a fork for this Nextcloud-Installer.
 
 ## Support
 No support is offered for this script.
