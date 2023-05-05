@@ -89,6 +89,8 @@ ssl(){
 }
 
 install-begin(){
+    output "Installing dnsutils"
+    apt install dnsutils -y
     output ""
     output "Enter the address you want to access Nextcloud with. This could be an FQDN or an IP address."
     output "For security, we recommend that you use an FQDN with a security certificate that this script can create after this point."
